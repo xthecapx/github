@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
+import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
 import { FormContext } from "../resources/Form";
 
 const Search = () => {
@@ -12,7 +12,6 @@ const Search = () => {
       container
       spacing={2}
       direction="row"
-      style={{ maxWidth: 1200, margin: '0 auto' }}
       justify="center"
       alignItems="center"
     >
