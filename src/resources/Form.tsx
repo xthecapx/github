@@ -4,14 +4,23 @@ import React, {
   ChangeEvent,
   FunctionComponent,
   ReactNode,
+  Dispatch,
+  SetStateAction,
 } from "react";
 
-export const FormContext = createContext<
-  Partial<{
-    form: { query: string };
-    updateField: (e: ChangeEvent<HTMLInputElement>) => void;
-  }>
->({});
+export const FormContext = createContext<{
+  form: { query: string };
+  updateField: (e: ChangeEvent<HTMLInputElement>) => void;
+  searchParam: string;
+  setSearchParam: Dispatch<SetStateAction<string>>;
+}>({
+  form: {
+    query: "",
+  },
+  updateField: () => {},
+  searchParam: "",
+  setSearchParam: () => {},
+});
 
 export const FormProvider: FunctionComponent<{
   children: ReactNode;
@@ -19,6 +28,7 @@ export const FormProvider: FunctionComponent<{
   const [form, setFormState] = useState<{ query: string }>({
     query: "",
   });
+  const [searchParam, setSearchParam] = useState<string>("");
 
   const updateField = (e: ChangeEvent<HTMLInputElement>) => {
     setFormState({
@@ -32,6 +42,8 @@ export const FormProvider: FunctionComponent<{
       value={{
         form,
         updateField,
+        searchParam,
+        setSearchParam,
       }}
     >
       {children}
