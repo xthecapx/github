@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import useSwr from "swr";
 import { FormContext } from "../resources/Form";
 import { fetcher } from "./";
@@ -32,19 +32,35 @@ export type Data = {
   incomplete_results: boolean;
   items: ItemType[];
 };
-const PAGE_SIZE = 10;
+
+export const PAGE_SIZE = 10;
 
 export const useRequest = (path?: string, query?: string): any => {
-  const { page } = useContext(FormContext);
+  const { page, count, dispatch } = useContext(FormContext);
   const url = `${baseUrl}${path}&per_page=${PAGE_SIZE}&page=${page}`;
   const { data, error, isValidating } = useSwr(path ? url : null, fetcher);
 
-  console.log(url);
+  useEffect(() => {
+    if (data) {
+      const apiCount = Math.ceil(data.total_count / PAGE_SIZE);
+      const normalizeCountWithGithubLimits = () => {
+        if (apiCount <= 1000) {
+          return apiCount;
+        }
+
+        return 1000;
+      };
+      const normalizedCount = normalizeCountWithGithubLimits();
+
+      if (normalizedCount !== count) {
+        dispatch({ type: "setTotalPages", payload: normalizedCount });
+      }
+    }
+  }, [data, dispatch, count]);
 
   return {
     data,
     error,
     isValidating,
-    PAGE_SIZE,
   };
 };
