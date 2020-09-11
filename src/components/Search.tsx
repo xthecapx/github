@@ -5,7 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import { FormContext } from "../resources/Form";
 
 const Search = () => {
-  const { form, updateField, setSearchParam } = useContext(FormContext);
+  const { form, updateField, dispatch } = useContext(FormContext);
 
   return (
     <Grid
@@ -31,7 +31,7 @@ const Search = () => {
           variant="contained"
           type="button"
           onClick={() => {
-            setSearchParam(form.query);
+            dispatch({type: 'setSearchParam' })
           }}
         >
           Search

@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import useSwr from "swr";
+import { FormContext } from "../resources/Form";
 import { fetcher } from "./";
 
 const baseUrl = "https://api.github.com/search";
@@ -30,14 +32,19 @@ export type Data = {
   incomplete_results: boolean;
   items: ItemType[];
 };
+const PAGE_SIZE = 10;
 
-export const useRequest = (
-  path?: string
-): { data: Partial<Data>; error: any; isValidating: any } => {
-  const { data = {}, error, isValidating } = useSwr<Data>(
-    path ? baseUrl + path : null,
-    fetcher
-  );
+export const useRequest = (path?: string, query?: string): any => {
+  const { page } = useContext(FormContext);
+  const url = `${baseUrl}${path}&per_page=${PAGE_SIZE}&page=${page}`;
+  const { data, error, isValidating } = useSwr(path ? url : null, fetcher);
 
-  return { data, error, isValidating };
+  console.log(url);
+
+  return {
+    data,
+    error,
+    isValidating,
+    PAGE_SIZE,
+  };
 };

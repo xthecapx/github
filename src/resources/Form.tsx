@@ -1,49 +1,82 @@
 import React, {
   createContext,
-  useState,
   ChangeEvent,
   FunctionComponent,
   ReactNode,
-  Dispatch,
-  SetStateAction,
+  useReducer,
 } from "react";
 
-export const FormContext = createContext<{
-  form: { query: string };
-  updateField: (e: ChangeEvent<HTMLInputElement>) => void;
+type FormFields = {
+  query: string;
+};
+
+type State = {
+  form: FormFields;
   searchParam: string;
-  setSearchParam: Dispatch<SetStateAction<string>>;
+  page: number;
+};
+
+type Action =
+  | { type: "setSearchParam"; }
+  | { type: "setPage"; payload: number }
+  | { type: "updateForm"; payload: object };
+
+const initialState = { form: { query: "" }, searchParam: "", page: 1 };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "setSearchParam":
+      return { ...state, searchParam: state.form.query };
+    case "setPage":
+      return { ...state, page: action.payload };
+    case "updateForm":
+      return { ...state, form: { ...state.form, ...action.payload } };
+    default:
+      throw new Error();
+  }
+}
+
+export const FormContext = createContext<{
+  changePageHandler: (event: any, value: number) => void;
+  form: { query: string };
+  page: number;
+  searchParam: string;
+  updateField: (e: ChangeEvent<HTMLInputElement>) => void;
+  dispatch: any;
 }>({
-  form: {
-    query: "",
-  },
+  ...initialState,
+  changePageHandler: () => {},
   updateField: () => {},
-  searchParam: "",
-  setSearchParam: () => {},
+  dispatch: () => {},
 });
 
 export const FormProvider: FunctionComponent<{
   children: ReactNode;
 }> = ({ children }) => {
-  const [form, setFormState] = useState<{ query: string }>({
-    query: "",
-  });
-  const [searchParam, setSearchParam] = useState<string>("");
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const changePageHandler = (event: any, value: number) => {
+    dispatch({ type: "setPage", payload: value });
+  };
 
   const updateField = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormState({
-      ...form,
-      [e.target.name]: e.target.value,
+    dispatch({
+      type: "updateForm",
+      payload: {
+        [e.target.name]: e.target.value,
+      },
     });
   };
 
   return (
     <FormContext.Provider
       value={{
-        form,
+        form: state.form,
+        page: state.page,
+        searchParam: state.searchParam,
         updateField,
-        searchParam,
-        setSearchParam,
+        changePageHandler,
+        dispatch,
       }}
     >
       {children}
