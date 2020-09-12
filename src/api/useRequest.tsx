@@ -41,6 +41,10 @@ export const useRequest = (path?: string, query?: string): any => {
   const { data, error, isValidating } = useSwr(path ? url : null, fetcher);
 
   useEffect(() => {
+    dispatch({ type: "setLoadingStatus", payload: isValidating });
+  }, [isValidating, dispatch]);
+
+  useEffect(() => {
     if (data) {
       const apiCount = Math.ceil(data.total_count / PAGE_SIZE);
       const normalizeCountWithGithubLimits = () => {
