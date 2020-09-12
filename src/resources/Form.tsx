@@ -17,6 +17,8 @@ type State = {
   page: number;
   count: number;
   loading: boolean;
+  targetUser: string;
+  appStatus: string;
 };
 
 type Action =
@@ -24,6 +26,8 @@ type Action =
   | { type: "setPage"; payload: number }
   | { type: "setTotalPages"; payload: number }
   | { type: "setLoadingStatus"; payload: boolean }
+  | { type: "setTargetUser"; payload: string }
+  | { type: "setAppStatus"; payload: "initial" | "playing" | "winner" | "lose" | "try-again" }
   | { type: "updateForm"; payload: object };
 
 const initialState: State = {
@@ -31,7 +35,9 @@ const initialState: State = {
   searchParam: "",
   page: 1,
   count: 1,
-  loading: false
+  loading: false,
+  targetUser: "",
+  appStatus: "initial",
 };
 
 function reducer(state: State, action: Action): State {
@@ -42,6 +48,10 @@ function reducer(state: State, action: Action): State {
       return { ...state, page: action.payload };
     case "setLoadingStatus":
       return { ...state, loading: action.payload };
+    case "setTargetUser":
+      return { ...state, targetUser: action.payload };
+    case "setAppStatus":
+      return { ...state, appStatus: action.payload };
     case "setTotalPages":
       return { ...state, count: Math.ceil(action.payload / PAGE_SIZE) };
     case "updateForm":
@@ -58,6 +68,8 @@ export const FormContext = createContext<{
   searchParam: string;
   count: number;
   loading: boolean;
+  targetUser: string;
+  appStatus: string;
   updateField: (e: ChangeEvent<HTMLInputElement>) => void;
   dispatch: any;
 }>({
@@ -93,6 +105,8 @@ export const FormProvider: FunctionComponent<{
         searchParam: state.searchParam,
         count: state.count,
         loading: state.loading,
+        targetUser: state.targetUser,
+        appStatus: state.appStatus,
         updateField,
         changePageHandler,
         dispatch,

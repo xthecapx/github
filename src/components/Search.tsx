@@ -5,18 +5,21 @@ import TextField from "@material-ui/core/TextField";
 import { FormContext } from "../resources/Form";
 
 const Search = () => {
-  const { form, updateField, dispatch, loading } = useContext(FormContext);
+  const { form, updateField, dispatch, loading, appStatus } = useContext(
+    FormContext
+  );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!loading) {
+    if (!loading && appStatus !== "playing") {
       dispatch({ type: "setSearchParam" });
+      dispatch({ type: "setAppStatus", payload: "playing" });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} autoComplete="off">
       <Grid
         container
         spacing={2}
@@ -33,6 +36,8 @@ const Search = () => {
             label="Search Github"
             variant="outlined"
             fullWidth
+            autoComplete="off"
+            type="search"
           />
         </Grid>
         <Grid item xs={2}>

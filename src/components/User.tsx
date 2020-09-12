@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useState, MouseEvent } from "react";
+import React, {
+  FunctionComponent,
+  useState,
+  MouseEvent,
+  useContext,
+} from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
@@ -8,8 +13,11 @@ import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
 
 import { ItemType } from "../api/useRequest";
+import { FormContext } from "../resources/Form";
 
 const User: FunctionComponent<ItemType> = ({
   login,
@@ -21,11 +29,13 @@ const User: FunctionComponent<ItemType> = ({
   organizations_url,
   repos_url,
 }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const open = (url: string) => {
     window.open(url);
   };
 
   const [anchorEl, setAnchorEl] = useState<any>(null);
+  const { targetUser, dispatch, appStatus } = useContext(FormContext);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -37,6 +47,14 @@ const User: FunctionComponent<ItemType> = ({
     if (typeof url === "string") {
       open(url);
     }
+  };
+
+  const closeSnackBar = (event: any, reason?: string) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
   };
 
   return (
@@ -55,6 +73,9 @@ const User: FunctionComponent<ItemType> = ({
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
+              <MenuItem onClick={() => open(html_url)}>
+                Go to Profile Page
+              </MenuItem>
               <MenuItem onClick={() => handleClose(followers_url)}>
                 Followers
               </MenuItem>
@@ -74,9 +95,33 @@ const User: FunctionComponent<ItemType> = ({
         subheader={login}
       />
       <CardActions>
-        <Button size="small" color="primary" onClick={() => open(html_url)}>
-          Go to Profile Page
+        <Button
+          size="small"
+          color="secondary"
+          onClick={() => {
+            if (login === targetUser) {
+              dispatch({ type: "setAppStatus", payload: "winner" });
+              setOpenSnackbar(true);
+            } else {
+              dispatch({ type: "setAppStatus", payload: "try-again" });
+              setOpenSnackbar(true);
+            }
+          }}
+        >
+          Verify!
         </Button>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={6000}
+          onClose={closeSnackBar}
+        >
+          <MuiAlert
+            onClose={closeSnackBar}
+            severity={appStatus === "winner" ? "success" : "warning"}
+          >
+            {appStatus === "winner" ? "You Nailed it!" : "Try Again!"}
+          </MuiAlert>
+        </Snackbar>
       </CardActions>
     </Card>
   );

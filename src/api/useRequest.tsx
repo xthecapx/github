@@ -33,10 +33,14 @@ export type Data = {
   items: ItemType[];
 };
 
-export const PAGE_SIZE = 10;
+export const PAGE_SIZE = 12;
+
+function getRandomUser(items: ItemType[]) {
+  return items[(items.length * Math.random()) | 0];
+}
 
 export const useRequest = (path?: string, query?: string): any => {
-  const { page, count, dispatch } = useContext(FormContext);
+  const { page, count, dispatch, targetUser } = useContext(FormContext);
   const url = `${baseUrl}${path}&per_page=${PAGE_SIZE}&page=${page}`;
   const { data, error, isValidating } = useSwr(path ? url : null, fetcher);
 
@@ -59,8 +63,14 @@ export const useRequest = (path?: string, query?: string): any => {
       if (normalizedCount !== count) {
         dispatch({ type: "setTotalPages", payload: normalizedCount });
       }
+
+      if (targetUser === "") {
+        const user = getRandomUser(data.items);
+
+        dispatch({ type: "setTargetUser", payload: user.login });
+      }
     }
-  }, [data, dispatch, count]);
+  }, [data, dispatch, count, targetUser]);
 
   return {
     data,
