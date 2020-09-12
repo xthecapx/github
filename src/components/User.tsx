@@ -3,6 +3,7 @@ import React, {
   useState,
   MouseEvent,
   useContext,
+  useEffect,
 } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
@@ -29,13 +30,19 @@ const User: FunctionComponent<ItemType> = ({
   organizations_url,
   repos_url,
 }) => {
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState<Boolean>(false);
   const open = (url: string) => {
     window.open(url);
   };
 
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const { targetUser, dispatch, appStatus } = useContext(FormContext);
+
+  useEffect(() => {
+    if (!openSnackbar && appStatus === "lose") {
+      setOpenSnackbar(true);
+    }
+  }, [appStatus, setOpenSnackbar, openSnackbar]);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -56,6 +63,26 @@ const User: FunctionComponent<ItemType> = ({
 
     setOpenSnackbar(false);
   };
+
+  const getSeverity = () => {
+    if (appStatus === "winner") {
+      return "success";
+    }
+
+    if (appStatus === "try-again") {
+      return "warning";
+    }
+
+    if (appStatus === "lose") {
+      return "error";
+    }
+  };
+  const messages = {
+    warning: "Try Again!",
+    error: "You Lose!",
+    success: "You Nailed It!!!!! :D",
+  };
+  const severity = getSeverity() || "success";
 
   return (
     <Card>
@@ -111,15 +138,12 @@ const User: FunctionComponent<ItemType> = ({
           Verify!
         </Button>
         <Snackbar
-          open={openSnackbar}
+          open={Boolean(openSnackbar)}
           autoHideDuration={6000}
           onClose={closeSnackBar}
         >
-          <MuiAlert
-            onClose={closeSnackBar}
-            severity={appStatus === "winner" ? "success" : "warning"}
-          >
-            {appStatus === "winner" ? "You Nailed it!" : "Try Again!"}
+          <MuiAlert onClose={closeSnackBar} severity={severity}>
+            {messages[severity]}
           </MuiAlert>
         </Snackbar>
       </CardActions>
